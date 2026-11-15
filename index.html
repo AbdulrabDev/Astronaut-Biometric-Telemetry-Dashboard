@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Lone Rover — Astronaut Biometric Telemetry & Health Command</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient Sci-Fi Grid & Scanline Overlay -->
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <div class="scanline-overlay" aria-hidden="true"></div>
+
+  <!-- Top Mission Telemetry Header -->
+  <header class="top-bar">
+    <div class="brand-cluster">
+      <div class="rover-emblem" aria-hidden="true">
+        <span class="emblem-ring"></span>
+        <span class="emblem-core"></span>
+      </div>
+      <div>
+        <div class="eyebrow-tag">NASA SPACE APPS // DEEP SPACE BIOMEDICAL TELEMETRY</div>
+        <h1 class="app-title">PROJECT LONE ROVER <span class="unit-pill">ARES-IV HABITAT</span></h1>
+      </div>
+    </div>
+
+    <div class="header-telemetry">
+      <div class="telemetry-chip">
+        <span class="chip-label">CREW ID</span>
+        <span class="chip-value" id="crewIdValue">CDR. A. SALEH [SOLO]</span>
+      </div>
+      <div class="telemetry-chip">
+        <span class="chip-label">ENVIRONMENT</span>
+        <button type="button" class="env-toggle-btn" id="envToggleBtn" title="Click to toggle Gravity Environment">
+          <span class="status-dot status-warning" id="envDot"></span>
+          <span id="envModeText">Microgravity (0.0G)</span>
+        </button>
+      </div>
+      <div class="telemetry-chip">
+        <span class="chip-label">SUIT O₂ RESERVE</span>
+        <span class="chip-value status-text-normal" id="o2ReserveValue">98.4%</span>
+      </div>
+      <div class="telemetry-chip">
+        <span class="chip-label">SYSTEM STATUS</span>
+        <span class="status-pill status-normal" id="globalSystemBadge">NOMINAL</span>
+      </div>
+      <div class="telemetry-chip clock-chip">
+        <span class="chip-label">MISSION ELAPSED (MET)</span>
+        <span class="chip-value mono-clock" id="missionClock">SOL 142 // 03:30:47</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Responsive Dashboard Grid (Clean Primary View) -->
+  <main class="dashboard-grid">
+    <!-- LEFT PANEL: Interactive Human Body Scanner -->
+    <section class="panel body-scanner-panel" aria-label="Interactive Human Biometric Scanner">
+      <div class="panel-header">
+        <div>
+          <span class="section-kicker">ANATOMICAL TELEMETRY TARGET</span>
+          <h2 class="panel-title">Interactive Bio-Scanner</h2>
+        </div>
+        <span class="active-zone-badge" id="activeZoneHeaderBadge">TARGET: HEART / CHEST</span>
+      </div>
+
+      <p class="scanner-instruction">
+        Select an anatomical region on the hologram or quick-select bar below to inspect live organ telemetry.
+      </p>
+
+      <!-- Quick Zone Selector Pills (Accessible & Fast) -->
+      <div class="zone-selector-tabs" role="tablist" aria-label="Anatomical Zones">
+        <button type="button" class="zone-tab" id="tab-brain" data-zone="brain" role="tab" aria-selected="false">
+          <span class="zone-indicator" id="tabDotBrain"></span>
+          Brain / Head
+        </button>
+        <button type="button" class="zone-tab active" id="tab-heart" data-zone="heart" role="tab" aria-selected="true">
+          <span class="zone-indicator" id="tabDotHeart"></span>
+          Heart / Chest
+        </button>
+        <button type="button" class="zone-tab" id="tab-bones" data-zone="bones" role="tab" aria-selected="false">
+          <span class="zone-indicator" id="tabDotBones"></span>
+          Bones / Limbs
+        </button>
+      </div>
+
+      <!-- Interactive SVG Human Figure Stage -->
+      <div class="holo-stage">
+        <div class="hud-corner hud-tl"></div>
+        <div class="hud-corner hud-tr"></div>
+        <div class="hud-corner hud-bl"></div>
+        <div class="hud-corner hud-br"></div>
+        <div class="laser-sweep" aria-hidden="true"></div>
+
+        <!-- SVG Astronaut Anatomical Silhouette -->
+        <svg class="human-svg" viewBox="0 0 280 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Astronaut Anatomical Hologram">
+          <defs>
+            <radialGradient id="holoGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.22" />
+              <stop offset="100%" stop-color="#00f2fe" stop-opacity="0" />
+            </radialGradient>
+            <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Base Platform Grid -->
+          <ellipse cx="140" cy="468" rx="86" ry="16" class="holo-pedestal" />
+          <ellipse cx="140" cy="468" rx="58" ry="9" class="holo-pedestal-inner" />
+
+          <!-- Outer Astronaut Body Contour -->
+          <g class="body-mesh">
+            <path d="M126 94 L154 94 L160 112 L196 122 L208 235 L188 238 L178 158 L172 248 L108 248 L102 158 L92 238 L72 235 L84 122 L120 112 Z" />
+            <path d="M108 250 L172 250 L178 286 L168 446 L146 446 L142 315 L138 315 L134 446 L112 446 L102 286 Z" />
+            <line x1="140" y1="95" x2="140" y2="282" stroke-dasharray="4 4" class="mesh-axis" />
+          </g>
+
+          <!-- ZONE 1: BRAIN / HEAD -->
+          <g class="body-zone" id="svg-zone-brain" data-zone="brain" tabindex="0" role="button" aria-label="Inspect Brain and Head Biometrics">
+            <circle cx="140" cy="56" r="34" class="zone-hit-area" />
+            <path d="M114 54 C114 34, 166 34, 166 54 C166 76, 154 92, 140 92 C126 92, 114 76, 114 54 Z" class="zone-shape" />
+            <path d="M125 50 Q140 38 155 50 M123 60 Q140 52 157 60 M140 38 L140 72" class="zone-detail" />
+            <circle cx="140" cy="54" r="5" class="zone-node" />
+            <line x1="170" y1="48" x2="218" y2="34" class="callout-line" />
+            <text x="222" y="38" class="callout-text">BRAIN / CNS</text>
+          </g>
+
+          <!-- ZONE 2: HEART / CHEST -->
+          <g class="body-zone active status-normal" id="svg-zone-heart" data-zone="heart" tabindex="0" role="button" aria-label="Inspect Heart and Chest Biometrics">
+            <rect x="98" y="114" width="84" height="106" rx="16" class="zone-hit-area" />
+            <path d="M106 122 L174 122 L168 208 L112 208 Z" class="zone-shape" />
+            <path d="M116 140 Q140 132 164 140 M114 158 Q140 150 166 158 M116 176 Q140 168 164 176" class="zone-detail" />
+            <circle cx="146" cy="156" r="11" class="heart-core-pulse" />
+            <circle cx="146" cy="156" r="5" class="zone-node" />
+            <line x1="174" y1="156" x2="218" y2="146" class="callout-line" />
+            <text x="222" y="150" class="callout-text">HEART / THORAX</text>
+          </g>
+
+          <!-- ZONE 3: BONES / LIMBS -->
+          <g class="body-zone status-normal" id="svg-zone-bones" data-zone="bones" tabindex="0" role="button" aria-label="Inspect Bones and Limbs Biometrics">
+            <path d="M84 130 L74 230 L92 232 L98 140 Z" class="zone-shape" />
+            <path d="M196 130 L206 230 L188 232 L182 140 Z" class="zone-shape" />
+            <path d="M110 264 L134 264 L132 440 L114 440 Z" class="zone-shape" />
+            <path d="M146 264 L170 264 L166 440 L148 440 Z" class="zone-shape" />
+            <line x1="86" y1="138" x2="82" y2="222" class="zone-detail" />
+            <line x1="194" y1="138" x2="198" y2="222" class="zone-detail" />
+            <line x1="122" y1="276" x2="122" y2="430" class="zone-detail" />
+            <line x1="158" y1="276" x2="158" y2="430" class="zone-detail" />
+            <circle cx="122" cy="342" r="5" class="zone-node" />
+            <circle cx="158" cy="342" r="5" class="zone-node" />
+            <line x1="170" y1="342" x2="218" y2="332" class="callout-line" />
+            <text x="222" y="336" class="callout-text">BONES / LIMBS</text>
+          </g>
+        </svg>
+
+        <!-- Quick Organ Summary Overlay Footer -->
+        <div class="scanner-mini-summary">
+          <div class="mini-stat">
+            <span class="mini-label">CARDIAC</span>
+            <span class="mini-val status-text-normal" id="miniHeartVal">74 BPM</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-label">CRANIAL</span>
+            <span class="mini-val status-text-normal" id="miniBrainVal">NOMINAL</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-label">SKELETAL</span>
+            <span class="mini-val status-text-normal" id="miniBoneVal">100.0%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Primary Live Biometrics + Progressive Disclosure Command Hub -->
+    <section class="right-column">
+      <!-- 1. Live Biometrics Inspection Deck (Always Visible in Primary View) -->
+      <article class="panel biometrics-panel" aria-live="polite">
+        <div class="panel-header">
+          <div>
+            <span class="section-kicker" id="bioPanelKicker">LIVE ORGAN TELEMETRY // STREAMING 1HZ</span>
+            <h2 class="panel-title" id="bioPanelTitle">Heart &amp; Cardiovascular System</h2>
+          </div>
+          <div class="live-stream-indicator">
+            <span class="pulse-ring-dot" id="liveStreamDot"></span>
+            <span id="liveStreamLabel">LIVE TELEMETRY</span>
+          </div>
+        </div>
+
+        <!-- ZONE PANEL A: HEART / CHEST -->
+        <div class="zone-metrics-view active" id="view-heart">
+          <div class="metrics-cards-grid">
+            <div class="metric-card pulse-card status-border-normal" id="cardHeartRate">
+              <div class="metric-card-top">
+                <span class="metric-name">HEART RATE (ECG LEAD II)</span>
+                <span class="status-badge status-normal" id="hrStatusBadge">NORMAL</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number live-pulse-number" id="hrValue">74</span>
+                <span class="metric-unit">BPM</span>
+              </div>
+              <div class="ecg-wave-bar" aria-hidden="true">
+                <div class="ecg-Sweep" id="ecgSweepLine"></div>
+              </div>
+              <p class="metric-subtext" id="hrSubtext">Resting sinus rhythm • Threshold: &lt; 100 BPM</p>
+            </div>
+
+            <div class="metric-card pulse-card status-border-normal" id="cardBloodPressure">
+              <div class="metric-card-top">
+                <span class="metric-name">ARTERIAL BLOOD PRESSURE</span>
+                <span class="status-badge status-normal" id="bpStatusBadge">NORMAL</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number live-pulse-number" id="bpValue">118/76</span>
+                <span class="metric-unit">mmHg</span>
+              </div>
+              <div class="bp-bar-track">
+                <div class="bp-bar-fill" id="bpBarFill" style="width: 58%;"></div>
+              </div>
+              <p class="metric-subtext" id="bpSubtext">Cranial fluid shift compensated • MAP: 90 mmHg</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE PANEL B: BRAIN / HEAD -->
+        <div class="zone-metrics-view" id="view-brain">
+          <div class="metrics-cards-grid three-cols">
+            <div class="metric-card pulse-card status-border-normal" id="cardMentalStatus">
+              <div class="metric-card-top">
+                <span class="metric-name">MENTAL STATUS</span>
+                <span class="status-badge status-normal" id="mentalStatusBadge">OPTIMAL</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number metric-text-lg live-pulse-number" id="mentalValue">98% Focus</span>
+              </div>
+              <p class="metric-subtext" id="mentalSubtext">Cognitive reaction latency: 212 ms (Nominal)</p>
+            </div>
+
+            <div class="metric-card pulse-card status-border-normal" id="cardStressLevel">
+              <div class="metric-card-top">
+                <span class="metric-name">CORTISOL / STRESS INDEX</span>
+                <span class="status-badge status-normal" id="stressStatusBadge">LOW</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number live-pulse-number" id="stressValue">18</span>
+                <span class="metric-unit">/ 100</span>
+              </div>
+              <p class="metric-subtext" id="stressSubtext">Autonomic HRV balance within deep-space baseline</p>
+            </div>
+
+            <div class="metric-card pulse-card status-border-normal" id="cardSleepHours">
+              <div class="metric-card-top">
+                <span class="metric-name">CIRCADIAN SLEEP LOG</span>
+                <span class="status-badge status-normal" id="sleepStatusBadge">RESTED</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number live-pulse-number" id="sleepValue">7.6</span>
+                <span class="metric-unit">HRS / 24H</span>
+              </div>
+              <p class="metric-subtext" id="sleepSubtext">REM efficiency: 24% • Last cycle synchronized</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE PANEL C: BONES / LIMBS -->
+        <div class="zone-metrics-view" id="view-bones">
+          <div class="metrics-cards-grid">
+            <div class="metric-card pulse-card status-border-normal" id="cardBoneDensity">
+              <div class="metric-card-top">
+                <span class="metric-name">DEXA TRABECULAR BONE DENSITY</span>
+                <span class="status-badge status-normal" id="boneStatusBadge">NORMAL</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number live-pulse-number" id="boneValue">100.0</span>
+                <span class="metric-unit">%</span>
+              </div>
+              <div class="bp-bar-track">
+                <div class="bp-bar-fill status-fill-normal" id="boneBarFill" style="width: 100%;"></div>
+              </div>
+              <p class="metric-subtext" id="boneSubtext">ARED resistance protocol active • Loss rate: 0.0%/mo</p>
+            </div>
+
+            <div class="metric-card pulse-card status-border-normal" id="cardRadiation">
+              <div class="metric-card-top">
+                <span class="metric-name">CUMULATIVE GCR RADIATION</span>
+                <span class="status-badge status-normal" id="radStatusBadge">NOMINAL</span>
+              </div>
+              <div class="metric-main-row">
+                <span class="metric-number live-pulse-number" id="radValue">14.2</span>
+                <span class="metric-unit">mSv</span>
+              </div>
+              <div class="bp-bar-track">
+                <div class="bp-bar-fill status-fill-normal" id="radBarFill" style="width: 14%;"></div>
+              </div>
+              <p class="metric-subtext" id="radSubtext">Dosimeter badge nominal • Career limit: 600 mSv</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PROGRESSIVE DISCLOSURE HUB (Keeps Primary Screen Clean while Highlighting All NASA Features) -->
+      <article class="panel disclosure-hub-panel">
+        <div class="disclosure-top-row">
+          <div>
+            <span class="section-kicker">MISSION TOOLS &amp; SELF-ASSESSMENT HUB</span>
+            <h2 class="panel-title">Extended Command &amp; NASA HRP Modules</h2>
+            <p class="disclosure-desc">
+              Expand operational simulation tools below, or jump directly into astronaut self-assessment modules.
+            </p>
+          </div>
+
+          <div class="disclosure-primary-actions">
+            <button type="button" class="btn-more-details" id="toggleDetailsBtn" aria-expanded="false" aria-controls="advancedDetailsContainer">
+              <span class="details-btn-icon" id="toggleDetailsIcon">▾</span>
+              <span id="toggleDetailsText">More Details: Simulator &amp; Medical Logistics</span>
+            </button>
+            <button type="button" class="btn-quick-eva" id="quickEvaBtn" title="Trigger EVA exertion &amp; Emergency Focus Mode">
+              ⚡ <span id="quickEvaBtnText">Quick EVA Test</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Direct Shortcut Pills to Self-Assessment Modules (So Judges Immediately See All Challenge Requirements) -->
+        <div class="module-shortcuts-bar" aria-label="Astronaut Self-Assessment Modules">
+          <span class="shortcut-bar-label">SELF-ASSESSMENT MODULES:</span>
+          <div class="shortcut-pills-wrap">
+            <button type="button" class="module-shortcut-pill" data-open-tab="checkin">
+              📋 Daily Check-in &amp; Routine Gamification
+            </button>
+            <button type="button" class="module-shortcut-pill" data-open-tab="trends">
+              📈 Dynamic Trends (30-Day Charts)
+            </button>
+            <button type="button" class="module-shortcut-pill" data-open-tab="hazards">
+              ⚠️ NASA 5 Spaceflight Hazards
+            </button>
+            <button type="button" class="module-shortcut-pill" data-open-tab="triage">
+              🩺 Symptom Triage &amp; Surgeon SBAR Report
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- COLLAPSIBLE CONTAINER: Hidden by Default for a Clean First Impression -->
+      <div class="advanced-details-container" id="advancedDetailsContainer" hidden>
+        <!-- 2. Mission Scenario Simulator (Predictive Sliders & EVA Trigger) -->
+        <article class="panel simulator-panel">
+          <div class="panel-header">
+            <div>
+              <span class="section-kicker">NASA PREDICTIVE PHYSIOLOGY ENGINE</span>
+              <h2 class="panel-title">Mission Scenario Simulator</h2>
+            </div>
+            <span class="sim-mode-tag" id="simStateBadge">SIMULATION READY</span>
+          </div>
+
+          <div class="simulator-controls">
+            <div class="slider-block">
+              <div class="slider-header-row">
+                <label for="missionDurationSlider" class="slider-label">
+                  Mission Duration (0 to 12 Months)
+                </label>
+                <span class="slider-readout" id="durationReadout">0 Months (Launch Baseline)</span>
+              </div>
+              <input
+                type="range"
+                id="missionDurationSlider"
+                class="sci-slider"
+                min="0"
+                max="12"
+                step="1"
+                value="0"
+                aria-label="Mission Duration in Months"
+              />
+              <div class="slider-ticks">
+                <span>0m</span>
+                <span>3m</span>
+                <span class="tick-threshold">6m (Osteopenia Threshold)</span>
+                <span>9m</span>
+                <span>12m</span>
+              </div>
+            </div>
+
+            <div class="sim-actions-row">
+              <div class="gravity-selector" role="group" aria-label="Gravity Environment">
+                <span class="control-caption">GRAVITY FIELD</span>
+                <div class="segmented-buttons">
+                  <button type="button" class="seg-btn active" id="btnMicrogravity" data-gravity="microgravity">
+                    Microgravity (0G)
+                  </button>
+                  <button type="button" class="seg-btn" id="btnMarsGravity" data-gravity="mars">
+                    Mars Surface (0.38G)
+                  </button>
+                </div>
+              </div>
+
+              <div class="eva-action-box">
+                <span class="control-caption">EXTRAVEHICULAR ACTIVITY</span>
+                <div class="eva-btn-group">
+                  <button type="button" class="btn-eva" id="startEvaBtn">
+                    <span class="btn-eva-icon">⚡</span>
+                    <span id="startEvaBtnText">Start EVA (Spacewalk)</span>
+                  </button>
+                  <button type="button" class="btn-reset" id="resetSimBtn" title="Reset Simulator to Nominal Baseline">
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3. Supply Chain & Medical Logistics Inventory Sync -->
+        <article class="panel logistics-panel" id="logisticsPanel">
+          <div class="panel-header">
+            <div>
+              <span class="section-kicker">AUTONOMOUS SUPPLY CHAIN &amp; PHARMACY SYNC</span>
+              <h2 class="panel-title">Medical Logistics</h2>
+            </div>
+            <span class="status-pill status-normal" id="logisticsStatusPill">INVENTORY SYNCED</span>
+          </div>
+
+          <div class="logistics-alert-box status-border-normal" id="logisticsAlertBanner" role="status" aria-live="polite">
+            <div class="alert-icon-wrap" id="logisticsAlertIcon">✓</div>
+            <div class="alert-copy">
+              <div class="alert-headline" id="logisticsHeadline">
+                NOMINAL BIOMETRIC LOGISTICS: All crew mineral &amp; metabolic reserves within target range.
+              </div>
+              <p class="alert-detail" id="logisticsMessage">
+                Standard daily prophylactic ration active. No emergency countermeasure dispensation required.
+              </p>
+            </div>
+          </div>
+
+          <div class="inventory-grid">
+            <div class="inventory-item" id="invItemCalcium">
+              <div class="inv-top">
+                <span class="inv-name">Calcium / Vitamin D3 Countermeasure</span>
+                <span class="inv-count" id="calciumCountText">43 Capsules</span>
+              </div>
+              <div class="inv-meta">
+                <span>Stock: <strong id="calciumSupplyMonths">2 Months Supply</strong></span>
+                <button type="button" class="btn-dispense" id="dispenseCalciumBtn">Dispense 1x Dose</button>
+              </div>
+            </div>
+
+            <div class="inventory-item">
+              <div class="inv-top">
+                <span class="inv-name">Emergency O₂ Reserve Canisters</span>
+                <span class="inv-count" id="o2CanisterText">6 Units (100%)</span>
+              </div>
+              <div class="inv-meta">
+                <span>EVA Life Support Backup</span>
+                <span class="inv-tag-ok" id="o2LogisticsTag">PRESSURIZED</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- 4. EMERGENCY FOCUS MODE OVERLAY -->
+  <div class="emergency-overlay" id="emergencyOverlay" role="alertdialog" aria-modal="true" aria-labelledby="emergencyTitle" aria-describedby="emergencySteps" hidden>
+    <div class="emergency-modal">
+      <div class="emergency-header-bar">
+        <span class="emergency-flash-dot"></span>
+        <span class="emergency-code">CODE RED // BIOMETRIC THRESHOLD BREACH (HR &gt; 120 BPM)</span>
+      </div>
+
+      <h2 class="emergency-title" id="emergencyTitle">CRITICAL HR</h2>
+
+      <div class="emergency-live-readout">
+        <div class="emerg-stat">
+          <span class="emerg-stat-label">LIVE HEART RATE</span>
+          <span class="emerg-stat-val" id="emergHrValue">126 BPM</span>
+        </div>
+        <div class="emerg-stat">
+          <span class="emerg-stat-label">SUIT O₂ LEVEL</span>
+          <span class="emerg-stat-val" id="emergO2Value">91.2%</span>
+        </div>
+        <div class="emerg-stat">
+          <span class="emerg-stat-label">BLOOD PRESSURE</span>
+          <span class="emerg-stat-val" id="emergBpValue">144/92</span>
+        </div>
+      </div>
+
+      <ol class="emergency-steps" id="emergencySteps">
+        <li><strong>1. Stop movement.</strong> Anchor tether immediately and halt all EVA physical exertion.</li>
+        <li><strong>2. Breathe deeply.</strong> Inhale 4 seconds, hold 2 seconds, exhale 6 seconds to engage vagal brake.</li>
+        <li><strong>3. Check O2 levels.</strong> Verify primary suit regulator flow and open auxiliary O₂ bypass valve.</li>
+      </ol>
+
+      <button type="button" class="btn-stabilize" id="stabilizeDismissBtn">
+        Stabilized / Dismiss
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="data/knowledge.js"></script>
+  <script src="js/extra.js"></script>
+</body>
+</html>
